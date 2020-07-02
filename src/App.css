@@ -1,72 +1,105 @@
-#root {
-  padding-left: 10px;
-  padding-top: 10px;
-}
-
-#form {
-  margin: 3% 2% 2%;
-  width: 35%;
-  padding: 10px 0 20px 0;
-  float: left;
-  border: 1px solid #000;
-  border-radius: 10px;
-}
-#title-form {
-  font-size: 20px;
-  font-weight: bold;
-  margin-left: 5%;
-}
-.field {
-  width: 90%;
-  margin: 15px;
+.container {
+  margin: auto;
+  width: 1250px;
   display: flex;
 }
-.field > input {
-  flex: 1;
-  padding: 10px;
-  width: 75%;
-  border-radius: 5px;
-  border: 1px solid gray;
+
+.form {
+  float: left;
+  width: 450px;
+  height: 350px;
+  margin: 20px;
+  padding: 20px;
+  position: relative;
+  border-radius: 8px;
+  border: 1px solid #cccccc;
 }
+.title-form {
+  margin: 0px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.field {
+  display: flex;
+  margin-bottom: 15px;
+}
+
 .field > label {
-  padding: 10px;
-  width: 25%;
+  width: 40%;
+  padding-top: 5px;
 }
 
 .buttons {
-  width: 70%;
-  margin-left: auto;
+  width: 72%;
   display: flex;
+  margin-left: auto;
 }
 .buttons > button {
-  width: 45%;
-  margin: 1%;
+  width: 50%;
+  float: left;
+  border: 0px;
   padding: 10px;
   cursor: pointer;
-  border: 0px;
-  border-radius: 5px;
   color: #ffffff;
+  border-radius: 5px;
   background-color: #909090;
 }
 .buttons > img {
   height: 35px;
-  margin-top: auto;
-  margin-bottom: auto;
-  margin-left: 10px;
   cursor: pointer;
+  margin-top: auto;
+  margin-left: auto;
+  margin-bottom: auto;
 }
 
-#title {
-  text-align: center;
-  font-size: 24px;
-  margin-bottom: 10px;
-}
-#table {
-  width: 60%;
+.list-items {
   float: left;
-  /* text-align: center; */
+  margin: 20px 5px;
+  padding: 20px 15px;
+  border-radius: 8px;
+  border: 1px solid #cccccc;
 }
-#button-table > button {
-  padding: 3px;
+.list-items > div > h4 {
+  margin-bottom: 20px;
+}
+.table {
+  margin-top: 5px;
+  border: 1px solid #cccccc;
+}
+.header-cell {
+  color: black;
+  font-weight: bold;
+}
+.button-table > button {
+  border: 0;
   cursor: pointer;
+  color: #2980e2;
+  text-decoration: underline;
+  background-color: transparent;
+}
+
+@media only screen and (max-width: 1249px) {
+  div.container {
+    width: 96%;
+  }
+  div.form {
+    margin-left: 0px;
+  }
+}
+
+@media only screen and (max-width: 1099px) {
+  div.container {
+    display: inline;
+  }
+  div.form {
+    float: none;
+    width: 500px;
+    margin: 20px auto;
+  }
+  div.list-items {
+    float: none;
+    width: 730px;
+    margin: auto;
+  }
 }

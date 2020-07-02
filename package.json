@@ -11,7 +11,7 @@
     "react-dom": "^16.13.1",
     "react-final-form": "^6.5.0",
     "react-scripts": "3.4.1",
-    "rsuite-table": "^3.13.1"
+    "rsuite": "^4.7.5"
   },
   "scripts": {
     "start": "react-scripts start",

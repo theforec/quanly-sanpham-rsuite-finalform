@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { Button, Input, InputNumber, Alert } from 'rsuite';
 import { Form, Field } from 'react-final-form'
 
 export default class FinalForm extends Component {
@@ -8,7 +9,7 @@ export default class FinalForm extends Component {
             item: this.props.item,
             valueId: "",
             valueName: "",
-            valuePrice: "",
+            valuePrice: "0",
             valueNote: "",
         }
     }
@@ -31,13 +32,26 @@ export default class FinalForm extends Component {
             priceItem: this.state.valuePrice,
             noteItem: this.state.valueNote
         }
+        //validate form
+        if (item.idItem === "" || item.nameItem === "" || item.priceItem === "") {
+            var string = "";
+            if (item.idItem === "") {
+                string += "Mã sản phẩm,";
+            }
+            if (item.nameItem === "") string += " Tên sản phẩm,";
+            if (item.priceItem === "0") string += " Đơn giá,";
+            string = string.substr(0, string.length - 1);
+            string += " không được bỏ trống";
+            Alert.error(string, 2000);
+            return;
+        }
         this.props.onSaveClick(item);
     }
 
     render() {
         return (
-            <div id="form">
-                <div id="title-form">Thông tin sản phẩm</div>
+            <div className="form">
+                <h4 className="title-form">Thông tin sản phẩm</h4>
                 <Form
                     onSubmit={() => { }}
                     render={({ handleSubmit, values }) => (
@@ -46,11 +60,11 @@ export default class FinalForm extends Component {
                                 {({ input, meta }) => (
                                     <div className="field">
                                         <label>Mã sản phẩm:</label>
-                                        <input {...input} type="text"
+                                        <Input {...input} type="text"
                                             readOnly={this.props.isUpdating ? true : false}
                                             value={this.state.valueId}
-                                            onChange={(event) => {
-                                                this.setState({ valueId: event.target.value });
+                                            onChange={(value) => {
+                                                this.setState({ valueId: value });
                                             }}
                                         />
                                         {meta.error && meta.touched && <span>{meta.error}</span>}
@@ -61,10 +75,10 @@ export default class FinalForm extends Component {
                                 {({ input, meta }) => (
                                     <div className="field">
                                         <label>Tên sản phẩm:</label>
-                                        <input {...input} type="text"
+                                        <Input {...input} type="text"
                                             value={this.state.valueName}
-                                            onChange={(event) => {
-                                                this.setState({ valueName: event.target.value });
+                                            onChange={(value) => {
+                                                this.setState({ valueName: value });
                                             }}
                                         />
                                         {meta.error && meta.touched && <span>{meta.error}</span>}
@@ -75,10 +89,13 @@ export default class FinalForm extends Component {
                                 {({ input, meta }) => (
                                     <div className="field">
                                         <label>Giá sản phẩm:</label>
-                                        <input {...input} type="text"
+                                        <InputNumber {...input}
+                                            // type="number"
+                                            step={1000000}
+                                            postfix="vnđ"
                                             value={this.state.valuePrice}
-                                            onChange={(event) => {
-                                                this.setState({ valuePrice: event.target.value });
+                                            onChange={(value) => {
+                                                this.setState({ valuePrice: value });
                                             }}
                                         />
                                         {meta.error && meta.touched && <span>{meta.error}</span>}
@@ -89,25 +106,25 @@ export default class FinalForm extends Component {
                                 {({ input, meta }) => (
                                     <div className="field">
                                         <label>Ghi chú:</label>
-                                        <input {...input} type="text"
+                                        <Input {...input} type="text"
                                             value={this.state.valueNote}
-                                            onChange={(event) => {
-                                                this.setState({ valueNote: event.target.value });
+                                            onChange={(value) => {
+                                                this.setState({ valueNote: value });
                                             }}
                                         />
                                         {meta.error && meta.touched && <span>{meta.error}</span>}
                                     </div>
                                 )}
                             </Field>
+
                             <div className="buttons">
-                                <button
-                                    type="submit"
+                                <Button
                                     onClick={this.saveInfo}
                                 >{this.props.isUpdating ? "Cập nhật" : "Thêm mới"}
-                                </button>
+                                </Button>
                                 <img alt="Reset"
                                     onClick={this.props.onResetClick}
-                                    src="https://img.icons8.com/flat_round/64/000000/available-updates--v1.png" />
+                                    src="https://cdn.iconscout.com/icon/premium/png-512-thumb/refresh-387-370816.png" />
                             </div>
                         </form>
                     )}
