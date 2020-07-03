@@ -14,15 +14,16 @@ export default class FinalForm extends Component {
         }
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.item !== this.props.item)
-            this.setState({
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if (nextProps.item !== prevState.item)
+            return {
                 item: nextProps.item,
                 valueId: nextProps.item.idItem,
                 valueName: nextProps.item.nameItem,
-                valuePrice: nextProps.item.priceItem,
                 valueNote: nextProps.item.noteItem,
-            })
+                valuePrice: nextProps.item.priceItem,
+            }
+        return null;
     }
 
     saveInfo = () => {
@@ -34,10 +35,8 @@ export default class FinalForm extends Component {
         }
         //validate form
         if (item.idItem === "" || item.nameItem === "" || item.priceItem === "") {
-            var string = "";
-            if (item.idItem === "") {
-                string += "Mã sản phẩm,";
-            }
+            let string = "";
+            if (item.idItem === "") string += "Mã sản phẩm,";
             if (item.nameItem === "") string += " Tên sản phẩm,";
             if (item.priceItem === "0") string += " Đơn giá,";
             string = string.substr(0, string.length - 1);
@@ -67,6 +66,7 @@ export default class FinalForm extends Component {
                                                 this.setState({ valueId: value });
                                             }}
                                         />
+                                        {/* {console.log(meta)} */}
                                         {meta.error && meta.touched && <span>{meta.error}</span>}
                                     </div>
                                 )}

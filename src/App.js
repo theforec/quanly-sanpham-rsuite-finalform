@@ -3,6 +3,7 @@ import { Alert } from 'rsuite';
 import './App.css';
 import FinalForm from './Components/FinalForm';
 import RSuiteTable from './Components/RSuiteTable';
+import FieldArrays from './Components/FieldArrays'
 
 class App extends Component {
     constructor(props) {
@@ -12,54 +13,44 @@ class App extends Component {
             item: null,
             isUpdating: false,
             isFiltering: false,
-            // isDeleting: false,
         }
     }
     saveStorage = () => {
         localStorage.setItem("listItems", JSON.stringify(this.listItems));
     }
     setItem = (data) => {
-        // console.log("setItem, isDeleting: " + this.state.isDeleting);
-        // if (this.state.isDeleting) return;
         this.setState({
             item: data,
             isUpdating: true,
-            // isDeleting: false,
         })
 
     }
     resetItem = () => {
-        // console.log("reset, isDeleting: " + this.state.isDeleting);
         this.setState({
             item: { "idItem": "", "nameItem": "", "priceItem": "0", "noteItem": "" },
             isUpdating: false
         })
     }
-    saveInfo = (item) => {
-        if (!this.state.isUpdating) { //adding
-            let errorId = 0;
-            this.listItems.find(sp => {
-                if (item.idItem === sp.idItem)
-                    errorId++;
-            });
-            if (errorId !== 0) {
-                Alert.warning("Mã sản phẩm đã tồn tại", 3000);
+
+    updateLists = (list, item) => {
+        list.forEach((sp, i) => {
+            if (sp.idItem === item.idItem) {
+                list[i] = item;
                 return;
             }
-            this.listItems.push(item);
+        });
+    }
+    saveInfo = (item) => {
+        //updating
+        if (this.state.isUpdating) {
+            this.updateLists(this.listItems, item);
+            if (this.state.isFiltering)
+                this.updateLists(this.listItemsFiltered, item);
+            Alert.success("Cập nhật sản phẩm thành công");
         }
-        else { //updating
-            this.listItems.find((sp, i) => {
-                if (sp.idItem === item.idItem)
-                    this.listItems[i] = item;
-            });
-            if (this.state.isFiltering) {
-                this.listItemsFiltered.find((sp, i) => {
-                    if (sp.idItem === item.idItem)
-                        this.listItemsFiltered[i] = item;
-                });
-            }
-        }
+        else //adding
+            this.listItems.find(sp => sp.idItem === item.idItem) ?
+                Alert.warning("Mã sản phẩm đã tồn tại", 3000) : this.listItems.push(item);
         this.saveStorage();
         this.resetItem();
     }
@@ -70,23 +61,19 @@ class App extends Component {
             this.listItems = this.listItems.filter(sp => sp.idItem !== item.idItem);
             this.listItemsFiltered.splice(rowIndex, 1);
         }
-        else
-            this.listItems.splice(rowIndex, 1);
+        else this.listItems.splice(rowIndex, 1);
+
         this.saveStorage();
         this.resetItem();
-        // if (!this.state.isUpdating)
-        // this.setState({
-        //     isDeleting: true
-        // });
-        // console.log("delete, isDeleting: " + this.state.isDeleting);
+    }
+    searchString(value, string) {
+        return value.toLowerCase().search(string) !== -1;
     }
     searchFilter = (searchInput) => {
         this.setState({ isFiltering: true })
         this.listItemsFiltered = this.listItems.filter(item =>
-            item.idItem.toLowerCase().search(searchInput) !== -1 || item.nameItem.toLowerCase().search(searchInput) !== -1 ||
-            item.priceItem.search(searchInput) !== -1 || item.noteItem.toLowerCase().search(searchInput) !== -1)
-        // console.log(this.listItemsFiltered);
-
+            this.searchString(item.idItem, searchInput) || this.searchString(item.nameItem, searchInput) ||
+            this.searchString(item.noteItem, searchInput) || item.priceItem.search(searchInput) !== -1)
     }
 
     render() {
@@ -107,6 +94,7 @@ class App extends Component {
                     onSearchClick={(value) => this.searchFilter(value)}
                 />
 
+                {/* <FieldArrays /> */}
             </div>
         );
     }
