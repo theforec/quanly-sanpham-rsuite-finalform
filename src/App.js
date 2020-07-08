@@ -3,32 +3,27 @@ import { Alert } from 'rsuite';
 import './App.css';
 import FinalForm from './Components/FinalForm';
 import RSuiteTable from './Components/RSuiteTable';
-import FieldArrays from './Components/FieldArrays'
 
 class App extends Component {
     constructor(props) {
         super(props);
-        this.listItems = JSON.parse(localStorage.getItem("listItems")) || [];
         this.state = {
             item: null,
-            isUpdating: false,
+            valueSearch: "",
             isFiltering: false,
+            listItemsFiltered: [],
+            listItems: JSON.parse(localStorage.getItem("listItems")) || [],
         }
     }
+
     saveStorage = () => {
-        localStorage.setItem("listItems", JSON.stringify(this.listItems));
+        localStorage.setItem("listItems", JSON.stringify(this.state.listItems));
     }
-    setItem = (data) => {
+
+    setItem = data => {
         this.setState({
             item: data,
             isUpdating: true,
-        })
-
-    }
-    resetItem = () => {
-        this.setState({
-            item: { "idItem": "", "nameItem": "", "priceItem": "0", "noteItem": "" },
-            isUpdating: false
         })
     }
 
@@ -40,61 +35,89 @@ class App extends Component {
             }
         });
     }
-    saveInfo = (item) => {
-        //updating
-        if (this.state.isUpdating) {
-            this.updateLists(this.listItems, item);
-            if (this.state.isFiltering)
-                this.updateLists(this.listItemsFiltered, item);
+
+    saveInfo = (action, _item) => {
+        let { listItems, isFiltering, listItemsFiltered } = this.state;
+        if (action === "updating") {
+            this.updateLists(listItems, _item);
+
+            if (isFiltering)
+                this.updateLists(listItemsFiltered, _item);
+
             Alert.success("Cập nhật sản phẩm thành công");
         }
-        else //adding
-            this.listItems.find(sp => sp.idItem === item.idItem) ?
-                Alert.warning("Mã sản phẩm đã tồn tại", 3000) : this.listItems.push(item);
+        else { //adding
+            //check if idItem is exist?
+            let exist = listItems.find(sp => sp.idItem === _item.idItem)
+            if (exist) return Alert.warning("Mã sản phẩm đã tồn tại", 3000);
+
+            //idItem is not exist
+            listItems.push(_item);
+            Alert.success("Thêm sản phẩm thành công");
+            listItemsFiltered = listItems;
+            this.setState({ valueSearch: "" }, () => { })
+        }
+        //call child method: reset form
+        this.form.resetForm();
+        this.setState({ listItems, listItemsFiltered })
         this.saveStorage();
-        this.resetItem();
     }
 
     deleteItem = (rowIndex) => {
-        if (this.state.isFiltering) {
-            let item = this.listItemsFiltered[rowIndex];
-            this.listItems = this.listItems.filter(sp => sp.idItem !== item.idItem);
-            this.listItemsFiltered.splice(rowIndex, 1);
-        }
-        else this.listItems.splice(rowIndex, 1);
+        let { listItems, isFiltering, listItemsFiltered } = this.state;
 
+        if (isFiltering) {
+            let _id = listItemsFiltered[rowIndex].idItem;
+            listItemsFiltered.splice(rowIndex, 1);
+            listItems = listItems.filter(sp => sp.idItem !== _id);
+        }
+        //adding
+        else listItems.splice(rowIndex, 1);
+
+        Alert.success("Xoá sản phẩm thành công");
+        this.form.resetForm();
+        this.setState({ listItems, listItemsFiltered }, () => { })
         this.saveStorage();
-        this.resetItem();
     }
-    searchString(value, string) {
-        return value.toLowerCase().search(string) !== -1;
+
+    searchString = (value, string) => {
+        return value.toLowerCase().search(string.toLowerCase()) !== -1;
     }
+
     searchFilter = (searchInput) => {
-        this.setState({ isFiltering: true })
-        this.listItemsFiltered = this.listItems.filter(item =>
-            this.searchString(item.idItem, searchInput) || this.searchString(item.nameItem, searchInput) ||
-            this.searchString(item.noteItem, searchInput) || item.priceItem.search(searchInput) !== -1)
+        let { listItems } = this.state;
+        this.setState({
+            isFiltering: true,
+            listItemsFiltered: listItems.filter(item =>
+                this.searchString(item.idItem, searchInput) || this.searchString(item.nameItem, searchInput) ||
+                this.searchString(item.noteItem, searchInput) || item.priceItem.search(searchInput) !== -1)
+        })
     }
+
+    handleSearchChange = value => this.setState({ valueSearch: value })
 
     render() {
+        const { item, isFiltering, listItemsFiltered, listItems, valueSearch } = this.state;
         return (
             <div className="container">
 
                 <FinalForm
-                    item={this.state.item}
-                    isUpdating={this.state.isUpdating}
-                    onResetClick={() => this.resetItem()}
-                    onSaveClick={(data) => this.saveInfo(data)}
+                    item={item}
+                    ref={ref => this.form = ref}
+                    onSaveClick={(action, data) => this.saveInfo(action, data)}
                 />
 
                 <RSuiteTable
-                    dataTable={this.state.isFiltering ? this.listItemsFiltered : this.listItems}
+                    dataTable={isFiltering ? listItemsFiltered : listItems}
+                    valueSearch={valueSearch}
                     onRowClick={(data) => this.setItem(data)}
+                    onSearchClick={() => this.searchFilter(valueSearch)}
                     onDeleteClick={(rowIndex) => this.deleteItem(rowIndex)}
-                    onSearchClick={(value) => this.searchFilter(value)}
+                    handleSearchChange={(value) => this.handleSearchChange(value)}
                 />
 
-                {/* <FieldArrays /> */}
+                {/* <StateUp /> */}
+
             </div>
         );
     }

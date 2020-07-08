@@ -1,133 +1,96 @@
-import React, { Component } from 'react'
-import { Button, Input, InputNumber, Alert } from 'rsuite';
-import { Form, Field } from 'react-final-form'
-
+import React, { Component } from 'react';
+import { Form } from 'react-final-form';
+import { Alert, Button } from 'rsuite';
+import FieldItem from './FieldItem';
 export default class FinalForm extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            item: this.props.item,
-            valueId: "",
-            valueName: "",
-            valuePrice: "0",
-            valueNote: "",
+            item: {},
+            reset: false,
+            typing: false,
+            isUpdating: false,
         }
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.item !== prevState.item)
+        if (prevState.typing) return null;
+        //reset button onClick
+        if (prevState.reset) {
             return {
-                item: nextProps.item,
-                valueId: nextProps.item.idItem,
-                valueName: nextProps.item.nameItem,
-                valueNote: nextProps.item.noteItem,
-                valuePrice: nextProps.item.priceItem,
+                reset: false,
+                isUpdating: false,
+                item: {}
             }
+        }
+
+        //when table onRowClick > display data on the form
+        if (nextProps.item !== prevState.item && nextProps.item !== null) {
+            return {
+                isUpdating: true,
+                item: nextProps.item,
+            }
+        }
         return null;
     }
 
-    saveInfo = () => {
-        let item = {
-            idItem: this.state.valueId,
-            nameItem: this.state.valueName,
-            priceItem: this.state.valuePrice,
-            noteItem: this.state.valueNote
-        }
-        //validate form
-        if (item.idItem === "" || item.nameItem === "" || item.priceItem === "") {
+    validateForm = (values) => {
+        if (!values.noteItem) values["noteItem"] = "";
+        if (!values.idItem || !values.nameItem || !values.priceItem) {
             let string = "";
-            if (item.idItem === "") string += "Mã sản phẩm,";
-            if (item.nameItem === "") string += " Tên sản phẩm,";
-            if (item.priceItem === "0") string += " Đơn giá,";
+            if (!values.idItem) string += "Mã sản phẩm,";
+            if (!values.nameItem) string += " Tên sản phẩm,";
+            if (!values.priceItem) string += " Đơn giá,";
             string = string.substr(0, string.length - 1);
             string += " không được bỏ trống";
-            Alert.error(string, 2000);
-            return;
+            Alert.error(string, 3000);
+            return false;
         }
-        this.props.onSaveClick(item);
+        return true;
+    }
+
+    onSubmit = (values) => {
+        if (!this.validateForm(values)) return;
+        //send values to function in App.js
+        let action = this.state.isUpdating ? "updating" : "adding";
+        this.props.onSaveClick(action, values);
+    }
+
+    resetForm = () => this.setState({ reset: true, typing: false })
+
+    changeItem = (name, value) => {
+        let _item = { ...this.state.item, [name]: value }
+        this.setState({ typing: true, item: _item })
     }
 
     render() {
+        const { item, isUpdating } = this.state;
         return (
             <div className="form">
                 <h4 className="title-form">Thông tin sản phẩm</h4>
                 <Form
-                    onSubmit={() => { }}
-                    render={({ handleSubmit, values }) => (
-                        <form onSubmit={handleSubmit}>
-                            <Field name="idItem">
-                                {({ input, meta }) => (
-                                    <div className="field">
-                                        <label>Mã sản phẩm:</label>
-                                        <Input {...input} type="text"
-                                            readOnly={this.props.isUpdating ? true : false}
-                                            value={this.state.valueId}
-                                            onChange={(value) => {
-                                                this.setState({ valueId: value });
-                                            }}
-                                        />
-                                        {/* {console.log(meta)} */}
-                                        {meta.error && meta.touched && <span>{meta.error}</span>}
-                                    </div>
-                                )}
-                            </Field>
-                            <Field name="nameItem" >
-                                {({ input, meta }) => (
-                                    <div className="field">
-                                        <label>Tên sản phẩm:</label>
-                                        <Input {...input} type="text"
-                                            value={this.state.valueName}
-                                            onChange={(value) => {
-                                                this.setState({ valueName: value });
-                                            }}
-                                        />
-                                        {meta.error && meta.touched && <span>{meta.error}</span>}
-                                    </div>
-                                )}
-                            </Field>
-                            <Field name="priceItem" >
-                                {({ input, meta }) => (
-                                    <div className="field">
-                                        <label>Giá sản phẩm:</label>
-                                        <InputNumber {...input}
-                                            // type="number"
-                                            step={1000000}
-                                            postfix="vnđ"
-                                            value={this.state.valuePrice}
-                                            onChange={(value) => {
-                                                this.setState({ valuePrice: value });
-                                            }}
-                                        />
-                                        {meta.error && meta.touched && <span>{meta.error}</span>}
-                                    </div>
-                                )}
-                            </Field>
-                            <Field name="noteItem" >
-                                {({ input, meta }) => (
-                                    <div className="field">
-                                        <label>Ghi chú:</label>
-                                        <Input {...input} type="text"
-                                            value={this.state.valueNote}
-                                            onChange={(value) => {
-                                                this.setState({ valueNote: value });
-                                            }}
-                                        />
-                                        {meta.error && meta.touched && <span>{meta.error}</span>}
-                                    </div>
-                                )}
-                            </Field>
+                    onSubmit={this.onSubmit}
+                    // validate={(values) => this.validateForm(values)}
+                    initialValues={item}
+                    render={({ handleSubmit }) => {
+                        return (
+                            <form onSubmit={handleSubmit}>
+                                <FieldItem type="text" name="idItem" label="Mã sản phẩm" _readOnly={isUpdating} handleChange={(name, value) => this.changeItem(name, value)} />
+                                <FieldItem type="text" name="nameItem" label="Tên sản phẩm" handleChange={(name, value) => this.changeItem(name, value)} />
+                                <FieldItem type="number" name="priceItem" label="Giá" handleChange={(name, value) => this.changeItem(name, value)} />
+                                <FieldItem type="text" name="noteItem" label="Ghi chú" handleChange={(name, value) => this.changeItem(name, value)} />
 
-                            <div className="buttons">
-                                <Button
-                                    onClick={this.saveInfo}
-                                >{this.props.isUpdating ? "Cập nhật" : "Thêm mới"}
-                                </Button>
-                                <img alt="Reset"
-                                    onClick={this.props.onResetClick}
-                                    src="https://cdn.iconscout.com/icon/premium/png-512-thumb/refresh-387-370816.png" />
-                            </div>
-                        </form>
-                    )}
+                                <div className="buttons">
+                                    <Button type="submit" >
+                                        {isUpdating ? "Cập nhật" : "Thêm mới"}
+                                    </Button>
+                                    <img alt="Reset"
+                                        onClick={() => this.resetForm()}
+                                        src="https://cdn.iconscout.com/icon/premium/png-512-thumb/refresh-387-370816.png" />
+                                </div>
+                            </form>
+                        )
+                    }}
                 />
             </div>
         )
