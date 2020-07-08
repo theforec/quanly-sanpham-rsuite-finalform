@@ -116,8 +116,6 @@ class App extends Component {
                     handleSearchChange={(value) => this.handleSearchChange(value)}
                 />
 
-                {/* <StateUp /> */}
-
             </div>
         );
     }
