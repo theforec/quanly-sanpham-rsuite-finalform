@@ -3,6 +3,7 @@ import { Alert } from 'rsuite';
 import './App.css';
 import FinalForm from './Components/FinalForm';
 import RSuiteTable from './Components/RSuiteTable';
+import ConfirmModal from './Components/ConfirmModal'
 
 class App extends Component {
     constructor(props) {
@@ -50,6 +51,7 @@ class App extends Component {
             //check if idItem is exist?
             let exist = listItems.find(sp => sp.idItem === _item.idItem)
             if (exist) return Alert.warning("Mã sản phẩm đã tồn tại", 3000);
+            if (!_item.noteItem) _item.noteItem = "";
 
             //idItem is not exist
             listItems.push(_item);
@@ -59,22 +61,25 @@ class App extends Component {
         }
         //call child method: reset form
         this.form.resetForm();
-        this.setState({ listItems, listItemsFiltered })
         this.saveStorage();
+        this.setState({ listItems, listItemsFiltered })
     }
 
-    deleteItem = (rowIndex) => {
+    showModal = (rowIndex) => this.modal.open(rowIndex);
+
+    deleteItem = async (rowIndex) => {
         let { listItems, isFiltering, listItemsFiltered } = this.state;
 
         if (isFiltering) {
             let _id = listItemsFiltered[rowIndex].idItem;
             listItemsFiltered.splice(rowIndex, 1);
-            listItems = listItems.filter(sp => sp.idItem !== _id);
+            listItems = await listItems.filter(sp => sp.idItem !== _id);
         }
         //adding
         else listItems.splice(rowIndex, 1);
 
-        Alert.success("Xoá sản phẩm thành công");
+        Alert.success("Xoá sản phẩm thành công", 4000);
+        this.modal.close();
         this.form.resetForm();
         this.setState({ listItems, listItemsFiltered }, () => { })
         this.saveStorage();
@@ -107,12 +112,17 @@ class App extends Component {
                     onSaveClick={(action, data) => this.saveInfo(action, data)}
                 />
 
+                <ConfirmModal
+                    ref={ref => this.modal = ref}
+                    confirmDelete={(rowIndex) => this.deleteItem(rowIndex)}
+                />
+
                 <RSuiteTable
                     dataTable={isFiltering ? listItemsFiltered : listItems}
                     valueSearch={valueSearch}
                     onRowClick={(data) => this.setItem(data)}
                     onSearchClick={() => this.searchFilter(valueSearch)}
-                    onDeleteClick={(rowIndex) => this.deleteItem(rowIndex)}
+                    onDeleteClick={(rowIndex) => this.showModal(rowIndex)}
                     handleSearchChange={(value) => this.handleSearchChange(value)}
                 />
 

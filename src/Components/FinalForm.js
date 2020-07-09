@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Form } from 'react-final-form';
-import { Alert, Button } from 'rsuite';
+import { Button } from 'rsuite';
 import FieldItem from './FieldItem';
 export default class FinalForm extends Component {
     constructor(props) {
@@ -12,6 +12,8 @@ export default class FinalForm extends Component {
             isUpdating: false,
         }
     }
+
+    form = {};
 
     static getDerivedStateFromProps(nextProps, prevState) {
         if (prevState.typing) return null;
@@ -35,28 +37,31 @@ export default class FinalForm extends Component {
     }
 
     validateForm = (values) => {
-        if (!values.noteItem) values["noteItem"] = "";
-        if (!values.idItem || !values.nameItem || !values.priceItem) {
-            let string = "";
-            if (!values.idItem) string += "Mã sản phẩm,";
-            if (!values.nameItem) string += " Tên sản phẩm,";
-            if (!values.priceItem) string += " Đơn giá,";
-            string = string.substr(0, string.length - 1);
-            string += " không được bỏ trống";
-            Alert.error(string, 3000);
-            return false;
+        let errors = {};
+        if (!values.idItem) {
+            errors.idItem = "Mã sản phẩm không được bỏ trống"
         }
-        return true;
+        if (!values.nameItem) {
+            errors.nameItem = "Tên sản phẩm không được bỏ trống"
+        }
+        if (!values.priceItem || values.priceItem === 0) {
+            errors.priceItem = "Giá sản phẩm lớn hơn 0"
+        }
+        return errors;
     }
 
     onSubmit = (values) => {
-        if (!this.validateForm(values)) return;
         //send values to function in App.js
         let action = this.state.isUpdating ? "updating" : "adding";
         this.props.onSaveClick(action, values);
     }
 
-    resetForm = () => this.setState({ reset: true, typing: false })
+    resetForm = () => {
+        this.setState({
+            reset: true,
+            typing: false
+        }, () => { this.form.restart() })
+    }
 
     changeItem = (name, value) => {
         let _item = { ...this.state.item, [name]: value }
@@ -70,15 +75,16 @@ export default class FinalForm extends Component {
                 <h4 className="title-form">Thông tin sản phẩm</h4>
                 <Form
                     onSubmit={this.onSubmit}
-                    // validate={(values) => this.validateForm(values)}
+                    validate={this.validateForm}
                     initialValues={item}
-                    render={({ handleSubmit }) => {
+                    render={({ handleSubmit, form }) => {
+                        this.form = { ...form }
                         return (
                             <form onSubmit={handleSubmit}>
-                                <FieldItem type="text" name="idItem" label="Mã sản phẩm" _readOnly={isUpdating} handleChange={(name, value) => this.changeItem(name, value)} />
-                                <FieldItem type="text" name="nameItem" label="Tên sản phẩm" handleChange={(name, value) => this.changeItem(name, value)} />
-                                <FieldItem type="number" name="priceItem" label="Giá" handleChange={(name, value) => this.changeItem(name, value)} />
-                                <FieldItem type="text" name="noteItem" label="Ghi chú" handleChange={(name, value) => this.changeItem(name, value)} />
+                                <FieldItem type="text" name="idItem" label="Mã sản phẩm" _readOnly={isUpdating} handleChange={this.changeItem} />
+                                <FieldItem type="text" name="nameItem" label="Tên sản phẩm" handleChange={this.changeItem} />
+                                <FieldItem type="number" name="priceItem" label="Giá" handleChange={this.changeItem} />
+                                <FieldItem type="text" name="noteItem" label="Ghi chú" handleChange={this.changeItem} />
 
                                 <div className="buttons">
                                     <Button type="submit" >

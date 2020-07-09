@@ -5,14 +5,13 @@
 }
 
 .form {
-  float: left;
   width: 450px;
-  height: 350px;
+  height: auto;
   margin: 20px;
   padding: 20px;
-  position: relative;
   border-radius: 8px;
   border: 1px solid #cccccc;
+  margin-bottom: auto;
 }
 .title-form {
   margin: 0px;
@@ -29,14 +28,21 @@
   width: 40%;
   padding-top: 5px;
 }
+.field > div {
+  flex: 1;
+}
+.error {
+  color: red;
+  margin-top: 5px;
+}
 
 .buttons {
-  width: 72%;
+  width: 60%;
   display: flex;
   margin-left: auto;
 }
 .buttons > button {
-  width: 50%;
+  width: 60%;
   float: left;
   border: 0px;
   padding: 10px;

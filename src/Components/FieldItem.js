@@ -6,34 +6,39 @@ export default class FieldItem extends Component {
     TextFieldItem = ({ input, meta, ...rest }) => {
         const { _readOnly, handleChange } = this.props;
         return (
-            <Input
-                {...rest}
-                {...input}
-                errortext={meta.touched ? meta.error : ''}
-                readOnly={input.name === "idItem" && _readOnly ? true : false}
-                onChange={(value) => {
-                    input.onChange(value);
-                    handleChange(input.name, value);
-                }}
-            />
+            <div>
+                <Input
+                    {...rest}
+                    {...input}
+                    errortext={meta.touched ? meta.error : ''}
+                    disabled={input.name === "idItem" && _readOnly ? true : false}
+                    onChange={(value) => {
+                        input.onChange(value);
+                        handleChange(input.name, value);
+                    }}
+                />
+                {meta.error && meta.touched && <span className="error">&times; {meta.error}</span>}
+            </div>
         )
     }
-
 
     NumberFieldItem = ({ input, meta, ...rest }) => {
         const { handleChange } = this.props;
         return (
-            <InputNumber
-                {...rest}
-                {...input}
-                postfix="vnđ"
-                step={1000000}
-                errortext={meta.touched ? meta.error : ''}
-                onChange={(value) => {
-                    input.onChange(value);
-                    handleChange(input.name, value);
-                }}
-            />
+            <div>
+                <InputNumber
+                    {...rest}
+                    {...input}
+                    postfix="vnđ"
+                    step={1000000}
+                    errortext={meta.touched ? meta.error : ''}
+                    onChange={(value) => {
+                        input.onChange(value);
+                        handleChange(input.name, value);
+                    }}
+                />
+                {meta.error && meta.touched && <span className="error">&times; {meta.error}</span>}
+            </div>
         )
     }
 
