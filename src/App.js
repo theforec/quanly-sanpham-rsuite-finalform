@@ -38,16 +38,16 @@ class App extends Component {
     }
 
     saveInfo = (action, _item) => {
-        let { listItems, isFiltering, listItemsFiltered } = this.state;
+        let { listItems, isFiltering, listItemsFiltered, valueSearch } = this.state;
+        var noti = "";
         if (action === "updating") {
             this.updateLists(listItems, _item);
-
             if (isFiltering)
                 this.updateLists(listItemsFiltered, _item);
 
-            Alert.success("Cập nhật sản phẩm thành công");
+            noti = "Cập nhật sản phẩm thành công";
         }
-        else { //adding
+        else {
             //check if idItem is exist?
             let exist = listItems.find(sp => sp.idItem === _item.idItem)
             if (exist) return Alert.warning("Mã sản phẩm đã tồn tại", 3000);
@@ -55,14 +55,15 @@ class App extends Component {
 
             //idItem is not exist
             listItems.push(_item);
-            Alert.success("Thêm sản phẩm thành công");
+            noti = "Thêm sản phẩm thành công";
             listItemsFiltered = listItems;
-            this.setState({ valueSearch: "" }, () => { })
+            valueSearch = "";
         }
+        Alert.success(noti, 4000);
         //call child method: reset form
         this.form.resetForm();
         this.saveStorage();
-        this.setState({ listItems, listItemsFiltered })
+        this.setState({ listItems, listItemsFiltered, valueSearch });
     }
 
     showModal = (rowIndex) => this.modal.open(rowIndex);
@@ -81,7 +82,7 @@ class App extends Component {
         Alert.success("Xoá sản phẩm thành công", 4000);
         this.modal.close();
         this.form.resetForm();
-        this.setState({ listItems, listItemsFiltered }, () => { })
+        this.setState({ listItems, listItemsFiltered })
         this.saveStorage();
     }
 

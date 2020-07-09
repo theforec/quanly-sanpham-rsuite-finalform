@@ -26,9 +26,10 @@ export default class RSuiteTable extends Component {
 
                 </div>
                 <Table className="table"
+                    autoHeight
+                    minHeight={200}
                     width={700}
                     data={dataTable}
-                    autoHeight
                     onRowClick={(data) => onRowClick(data)} >
 
                     <Column width={100} >
